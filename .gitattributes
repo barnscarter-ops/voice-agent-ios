@@ -1,0 +1,5 @@
+# Authored on Windows, built on a Mac. Pin line endings in the repository to LF
+# so a CRLF blob can never reach the build machine — xcodebuild tolerates it,
+# but a CRLF .pbxproj produces diffs that look like the whole file changed.
+* text=auto eol=lf
+*.png binary

@@ -1,0 +1,17 @@
+.DS_Store
+*.xcuserstate
+xcuserdata/
+HermesVoice.xcodeproj/project.xcworkspace/xcuserdata/
+*.moved-aside
+DerivedData/
+build/
+*.ipa
+*.xcarchive
+Pods/
+.build/
+
+# Never commit a bridge token or a tailnet address. There is no config file in
+# this repo that holds either — both are entered in the app at runtime, the
+# token into the Keychain. This entry exists so a stray one cannot slip in.
+*.env
+.env*

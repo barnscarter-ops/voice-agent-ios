@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Hermes</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+
+	<!-- Must stay $(CURRENT_PROJECT_VERSION). fastlane bumps the build number by
+	     passing CURRENT_PROJECT_VERSION on the xcodebuild line, so a literal here
+	     would silently ship the same build number to App Store Connect twice. -->
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+
+	<!-- An empty dict is the modern equivalent of a storyboard launch screen.
+	     Omitting the key entirely makes the app launch in a compatibility mode
+	     with a letterboxed window. -->
+	<key>UILaunchScreen</key>
+	<dict/>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Hermes records what you say and sends it to your own bridge so it can answer out loud.</string>
+
+	<!-- Playback continues while the screen locks, so a long answer is not cut
+	     off mid-sentence. Recording is foreground-only by design. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+
+	<!--
+	  The bridge is plain HTTP on a Tailscale address, which App Transport
+	  Security blocks by default.
+
+	  NSAllowsLocalNetworking does not help: Tailscale hands out addresses in
+	  100.64.0.0/10, which is CGNAT space, not one of the private ranges ATS
+	  treats as local. NSExceptionDomains does not help either, because the
+	  address is typed in by the user at runtime and differs per machine.
+
+	  That leaves NSAllowsArbitraryLoads. It is acceptable here because the only
+	  host this app ever talks to is the one the user enters, that host is
+	  reachable only inside their own tailnet, and every request carries a bearer
+	  token. Nothing is exposed to the public internet — see the non-goals in the
+	  voice-agent repo's PLAN.md.
+	-->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+</dict>
+</plist>
