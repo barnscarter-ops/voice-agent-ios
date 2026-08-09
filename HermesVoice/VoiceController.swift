@@ -58,13 +58,12 @@ final class VoiceController: ObservableObject {
         self.pipecatClient = client
 
         let apiRequest = APIRequest(endpoint: url)
-        client.startBotAndConnect(startBotParams: apiRequest) { [weak self] result in
-            Task { @MainActor in
-                guard let self else { return }
-                switch result {
-                case .success:
-                    self.phase = .listening
-                case .failure(let error):
+        Task {
+            do {
+                let _ = try await client.startBotAndConnect(startBotParams: apiRequest)
+                await MainActor.run { self.phase = .listening }
+            } catch {
+                await MainActor.run {
                     self.phase = .disconnected
                     self.errorMessage = "Connection failed: \(error.localizedDescription)"
                 }
@@ -125,7 +124,8 @@ extension VoiceController: PipecatClientDelegate {
 
     func onUserTranscript(data: Transcript) {
         Task { @MainActor in
-            if let text = data.text, data.final == true {
+            let text = data.text
+            if data.final == true {
                 userTranscript = text
             }
         }
@@ -133,9 +133,8 @@ extension VoiceController: PipecatClientDelegate {
 
     func onBotLlmText(data: BotLLMText) {
         Task { @MainActor in
-            if let text = data.text {
-                botTranscript = text
-            }
+            let text = data.text
+            botTranscript = text
         }
     }
 
