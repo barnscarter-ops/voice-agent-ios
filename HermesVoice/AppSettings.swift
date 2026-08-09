@@ -3,7 +3,7 @@ import Foundation
 /// User-visible configuration for the Pipecat realtime server.
 ///
 /// The server URL points at the Pipecat FastAPI server (e.g.
-/// `http://100.124.216.11:7860`) running on the PC. No token is needed —
+/// `http://100.87.155.47:7860`) running on AIWA. No token is needed —
 /// the Pipecat server has no auth layer (tailnet-only).
 @MainActor
 final class AppSettings: ObservableObject {
@@ -11,7 +11,7 @@ final class AppSettings: ObservableObject {
         static let serverURL = "pipecatServerURL"
     }
 
-    /// The Pipecat server address (e.g. `http://100.124.216.11:7860`).
+    /// The Pipecat server address (e.g. `http://100.87.155.47:7860`).
     @Published var serverURLString: String {
         didSet { UserDefaults.standard.set(serverURLString, forKey: Key.serverURL) }
     }

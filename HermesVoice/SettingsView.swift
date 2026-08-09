@@ -10,14 +10,14 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("http://100.124.216.11:7860", text: $urlDraft)
+                    TextField("http://100.87.155.47:7860", text: $urlDraft)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
                 } header: {
                     Text("Pipecat server")
                 } footer: {
-                    Text("Your PC's Tailscale address and the Pipecat server port (default 7860). Reachable only over the tailnet.")
+                    Text("Your AIWA host's Tailscale address and the Pipecat server port (default 7860). Reachable only over the tailnet.")
                 }
             }
             .navigationTitle("Settings")
