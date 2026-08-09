@@ -59,7 +59,7 @@ final class VoiceController: ObservableObject {
 
         let apiRequest = APIRequest(endpoint: url)
         client.startBotAndConnect(startBotParams: apiRequest) {
-            [weak self] (result: Result<String, Error>) in
+            [weak self] (result: Result<SmallWebRTCStartBotResult, Error>) in
             Task { @MainActor in
                 guard let self else { return }
                 switch result {
