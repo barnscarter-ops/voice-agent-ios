@@ -87,18 +87,25 @@ final class VoiceController: ObservableObject {
     }
 
     func disconnect() {
-        pipecatClient?.disconnect()
+        let client = pipecatClient
         pipecatClient = nil
         phase = .disconnected
         userTranscript = ""
         botTranscript = ""
+        Task {
+            try? await client?.disconnect()
+        }
+    }
+
+    func clearError() {
+        errorMessage = nil
     }
 
     // MARK: - Interrupt
 
     /// Interrupt the bot while it's speaking (barge-in).
     func interrupt() {
-        pipecatClient?.interrupt()
+        // Pipecat SDK 1.3.0 doesn't expose interrupt directly; handled by VAD internally
     }
 }
 

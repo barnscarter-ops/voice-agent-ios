@@ -53,7 +53,7 @@ struct ContentView: View {
                 Text(message).font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Dismiss") { controller.errorMessage = nil }
+            Button("Dismiss") { controller.clearError() }
                 .font(.caption.weight(.semibold))
         }
         .padding(12)
