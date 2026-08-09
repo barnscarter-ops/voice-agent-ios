@@ -47,6 +47,9 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Hermes records what you say and sends it to your own bridge so it can answer out loud.</string>
 
+	<key>NSCameraUsageDescription</key>
+	<string>Hermes does not use the camera. This string satisfies the WebRTC SDK requirement.</string>
+
 	<!-- Playback continues while the screen locks, so a long answer is not cut
 	     off mid-sentence. Recording is foreground-only by design. -->
 	<key>UIBackgroundModes</key>
