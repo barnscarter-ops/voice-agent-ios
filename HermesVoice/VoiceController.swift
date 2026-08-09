@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import PipecatClientIOS
 import PipecatClientIOSSmallWebrtc
 
@@ -22,7 +23,6 @@ final class VoiceController: ObservableObject {
 
     private let settings: AppSettings
     private var pipecatClient: PipecatClient?
-    private var services: [RTVIServiceOption] = []
 
     init(settings: AppSettings) {
         self.settings = settings
@@ -50,27 +50,13 @@ final class VoiceController: ObservableObject {
         let options = PipecatClientOptions(
             transport: SmallWebRTCTransport(),
             enableMic: true,
-            enableCam: false,
-            params: RTVIClientParams(
-                config: [
-                    .init(
-                        service: SmallWebRTCTransport.SERVICE_NAME,
-                        options: [
-                            .init(name: "endpoint", value: .string(url.absoluteString)),
-                        ]
-                    ),
-                ]
-            ),
-            callbacks: nil
+            enableCam: false
         )
 
         let client = PipecatClient(options: options)
+        client.delegate = self
         self.pipecatClient = client
 
-        // Register delegates for state updates
-        client.delegate = self
-
-        // Start the connection — the SDK does the SDP offer/answer dance
         let apiRequest = APIRequest(endpoint: url)
         client.startBotAndConnect(startBotParams: apiRequest) { [weak self] result in
             Task { @MainActor in
@@ -101,59 +87,61 @@ final class VoiceController: ObservableObject {
         errorMessage = nil
     }
 
-    // MARK: - Interrupt
-
     /// Interrupt the bot while it's speaking (barge-in).
+    /// Pipecat SDK 1.3.0 handles VAD-based interruption internally;
+    /// no explicit interrupt method is exposed.
     func interrupt() {
-        // Pipecat SDK 1.3.0 doesn't expose interrupt directly; handled by VAD internally
+        // VAD handles barge-in automatically in the server pipeline
     }
 }
 
-// MARK: - PipecatClient Delegate
+// MARK: - PipecatClientDelegate
 
 extension VoiceController: PipecatClientDelegate {
 
-    nonisolated func didStartListening(client: PipecatClient) {
+    func onConnected() {
         Task { @MainActor in phase = .listening }
     }
 
-    nonisolated func didStopListening(client: PipecatClient) {
-        Task { @MainActor in if phase == .listening { phase = .thinking } }
-    }
-
-    nonisolated func didStartSpeaking(client: PipecatClient) {
-        Task { @MainActor in phase = .speaking }
-    }
-
-    nonisolated func didStopSpeaking(client: PipecatClient) {
-        Task { @MainActor in if phase == .speaking { phase = .listening } }
-    }
-
-    nonisolated func didDisconnect(client: PipecatClient) {
+    func onDisconnected() {
         Task { @MainActor in phase = .disconnected }
     }
 
-    nonisolated func didReceiveUserTranscription(client: PipecatClient, text: String, isFinal: Bool) {
+    func onBotStartedSpeaking() {
+        Task { @MainActor in phase = .speaking }
+    }
+
+    func onBotStoppedSpeaking() {
+        Task { @MainActor in if phase == .speaking { phase = .listening } }
+    }
+
+    func onUserStartedSpeaking() {
+        Task { @MainActor in phase = .listening }
+    }
+
+    func onUserStoppedSpeaking() {
+        Task { @MainActor in if phase == .listening { phase = .thinking } }
+    }
+
+    func onUserTranscript(data: Transcript) {
         Task { @MainActor in
-            if isFinal {
+            if let text = data.text, data.final == true {
                 userTranscript = text
             }
         }
     }
 
-    nonisolated func didReceiveBotTranscription(client: PipecatClient, text: String, isFinal: Bool) {
+    func onBotLlmText(data: BotLLMText) {
         Task { @MainActor in
-            if isFinal {
+            if let text = data.text {
                 botTranscript = text
-            } else {
-                botTranscript += text
             }
         }
     }
 
-    nonisolated func didReceiveError(client: PipecatClient, error: String) {
+    func onError(message: RTVIMessageInbound) {
         Task { @MainActor in
-            errorMessage = error
+            errorMessage = "Error: \(message.data ?? "unknown")"
         }
     }
 }

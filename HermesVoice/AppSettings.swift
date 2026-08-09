@@ -22,12 +22,13 @@ final class AppSettings: ObservableObject {
     }
 
     /// Parsed URL or nil. Tolerates a bare `host:port` by prepending `http://`.
+    /// The Pipecat iOS SDK handles internal routing (/start → /api/offer).
     var pipecatServerURL: URL? {
         let trimmed = serverURLString.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         let withScheme = trimmed.contains("://") ? trimmed : "http://" + trimmed
         guard let url = URL(string: withScheme), url.host != nil else { return nil }
-        return url.appendingPathComponent("api/offer")
+        return url.appendingPathComponent("start")
     }
 
     var isConfigured: Bool { pipecatServerURL != nil }
