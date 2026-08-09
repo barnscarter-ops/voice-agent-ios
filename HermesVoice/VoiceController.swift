@@ -58,12 +58,14 @@ final class VoiceController: ObservableObject {
         self.pipecatClient = client
 
         let apiRequest = APIRequest(endpoint: url)
-        Task {
-            do {
-                let _ = try await client.startBotAndConnect(startBotParams: apiRequest)
-                await MainActor.run { self.phase = .listening }
-            } catch {
-                await MainActor.run {
+        client.startBotAndConnect(startBotParams: apiRequest) {
+            [weak self] (result: Result<String, Error>) in
+            Task { @MainActor in
+                guard let self else { return }
+                switch result {
+                case .success:
+                    self.phase = .listening
+                case .failure(let error):
                     self.phase = .disconnected
                     self.errorMessage = "Connection failed: \(error.localizedDescription)"
                 }
