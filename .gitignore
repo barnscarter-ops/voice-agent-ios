@@ -15,3 +15,5 @@ Pods/
 # token into the Keychain. This entry exists so a stray one cannot slip in.
 *.env
 .env*
+
+.session/
